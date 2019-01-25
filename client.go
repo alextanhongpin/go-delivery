@@ -6,6 +6,9 @@ import (
 
 type Message interface {
 	Content() []byte
+	// Can use visitor pattern here.
+	// SMSContent() []byte
+	// BrowserNotificationContent() []byte
 	// From, To, Time
 }
 
@@ -36,17 +39,19 @@ func (g *GreetingMessage) Content() []byte {
 }
 
 type PromotionMessage struct {
-	msg []byte
+	title string
+	body  string
 }
 
 func (p *PromotionMessage) Content() []byte {
-	return p.msg
+	msg := fmt.Sprintf("%s - %s", p.title, p.body)
+	return []byte(msg)
 }
 
 func main() {
 	msgs := []Message{
 		&GreetingMessage{[]byte("hello world")},
-		&PromotionMessage{[]byte("50% off")},
+		&PromotionMessage{title: "CNY Sale", body: "50% Off"},
 	}
 
 	clients := []Client{
