@@ -6,9 +6,11 @@ import (
 
 type Message interface {
 	Content() []byte
+
 	// Can use visitor pattern here.
-	// SMSContent() []byte
-	// BrowserNotificationContent() []byte
+	SMSContent() []byte
+	BrowserNotificationContent() []byte
+
 	// From, To, Time
 }
 
@@ -19,23 +21,32 @@ type Client interface {
 type SMSClient struct{}
 
 func (s *SMSClient) Send(msg Message) error {
-	fmt.Println("[SMS]", string(msg.Content()))
+	fmt.Printf("[SMS] %s\n", msg.SMSContent())
 	return nil
 }
 
 type BrowserNotificationClient struct{}
 
 func (b *BrowserNotificationClient) Send(msg Message) error {
-	fmt.Println("[BrowserNotification]", string(msg.Content()))
+	fmt.Printf("[BrowserNotification] %s\n", msg.BrowserNotificationContent())
 	return nil
 }
 
 type GreetingMessage struct {
-	msg []byte
+	msg string
 }
 
 func (g *GreetingMessage) Content() []byte {
-	return g.msg
+	return []byte(g.msg)
+}
+
+func (g *GreetingMessage) SMSContent() []byte {
+	return g.Content()
+}
+
+func (g *GreetingMessage) BrowserNotificationContent() []byte {
+	msg := fmt.Sprintf("<h1>%s</h1>", g.msg)
+	return []byte(msg)
 }
 
 type PromotionMessage struct {
@@ -48,9 +59,18 @@ func (p *PromotionMessage) Content() []byte {
 	return []byte(msg)
 }
 
+func (p *PromotionMessage) SMSContent() []byte {
+	return p.Content()
+}
+
+func (p *PromotionMessage) BrowserNotificationContent() []byte {
+	msg := fmt.Sprintf("<h1>%s</h1><p>%s</p>", p.title, p.body)
+	return []byte(msg)
+}
+
 func main() {
 	msgs := []Message{
-		&GreetingMessage{[]byte("hello world")},
+		&GreetingMessage{"hello world"},
 		&PromotionMessage{title: "CNY Sale", body: "50% Off"},
 	}
 
