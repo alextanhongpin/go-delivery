@@ -6,15 +6,23 @@ import (
 
 type Message interface {
 	Content() []byte
+	// From, To, Time
 }
 
-type Notification interface {
+type Client interface {
 	Send(Message) error
 }
 
-type BrowserNotification struct {}
+type SMSClient struct{}
 
-func (b *BrowserNotification) Send(msg Message) error {
+func (s *SMSClient) Send(msg Message) error {
+	fmt.Println("[SMS]", string(msg.Content()))
+	return nil
+}
+
+type BrowserNotificationClient struct{}
+
+func (b *BrowserNotificationClient) Send(msg Message) error {
 	fmt.Println("[BrowserNotification]", string(msg.Content()))
 	return nil
 }
@@ -41,8 +49,14 @@ func main() {
 		&PromotionMessage{[]byte("50% off")},
 	}
 
-	client := new(BrowserNotification)
-	for _, msg := range msgs {
-		client.Send(msg)
+	clients := []Client{
+		new(BrowserNotificationClient),
+		new(SMSClient),
+	}
+
+	for _, client := range clients {
+		for _, msg := range msgs {
+			client.Send(msg)
+		}
 	}
 }
